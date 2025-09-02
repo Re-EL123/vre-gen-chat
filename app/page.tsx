@@ -35,22 +35,25 @@ export default function AIGenerator() {
     scrollToBottom()
   }, [messages])
 
-  // Hugging Face API wrapper
-  const queryHF = async (data: any) => {
+  const queryChat = async (message: string) => {
     try {
-      const response = await fetch("https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium", {
+      const response = await fetch("https://intellichat-ai-chatbot.p.rapidapi.com/chat", {
         method: "POST",
         headers: {
-          Authorization: "Bearer YOUR_HF_TOKEN", // Replace with your token
-          "Content-Type": "application/json",
+          "x-rapidapi-key": "82ae10db11mshb41ccacdd991130p108a22jsnf3ae22b94bbd",
+          "x-rapidapi-host": "intellichat-ai-chatbot.p.rapidapi.com",
+          "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: JSON.stringify(data),
+        body: new URLSearchParams({
+          message: message,
+          temperature: temperature,
+        }),
       })
-      const result = await response.json()
+      const result = await response.text()
       return result
     } catch (err) {
       console.error(err)
-      return { error: true }
+      return "Sorry, I could not generate a response."
     }
   }
 
@@ -68,13 +71,7 @@ export default function AIGenerator() {
     setChatText("")
     setLoading(true)
 
-    const data = {
-      inputs: payload,
-      parameters: { temperature: Number.parseFloat(temperature) },
-    }
-
-    const res = await queryHF(data)
-    const botReply = res?.generated_text || res?.[0]?.generated_text || "Sorry, I could not generate a response."
+    const botReply = await queryChat(payload)
 
     const botMessage: Message = {
       role: "bot",
@@ -187,8 +184,7 @@ export default function AIGenerator() {
 
                 <div className="p-3 rounded-lg bg-muted/50 border border-border/50">
                   <p className="text-xs text-muted-foreground">
-                    <strong>Note:</strong> Replace <code>YOUR_HF_TOKEN</code> with your Hugging Face API token for full
-                    functionality.
+                    <strong>Note:</strong> Now powered by IntelliChat AI for enhanced conversations.
                   </p>
                 </div>
 
@@ -213,7 +209,7 @@ export default function AIGenerator() {
                     {mode === "chat" ? "AI Chat Assistant" : "AI Image Generator"}
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    {mode === "chat" ? "Powered by Hugging Face Chat Models" : "Create images with AI (Flux Demo)"}
+                    {mode === "chat" ? "Powered by IntelliChat AI" : "Create images with AI (Flux Demo)"}
                   </p>
                 </div>
                 <Button onClick={quickUplift} variant="secondary" className="glass">
