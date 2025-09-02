@@ -37,6 +37,14 @@ export default function AIGenerator() {
 
   const queryChat = async (message: string) => {
     try {
+      console.log("[v0] Sending message:", message)
+      console.log("[v0] Temperature:", temperature)
+
+      const formData = new URLSearchParams()
+      formData.append("user-input", message)
+
+      console.log("[v0] Form data:", formData.toString())
+
       const response = await fetch("https://intellichat-ai-chatbot.p.rapidapi.com/chat", {
         method: "POST",
         headers: {
@@ -44,15 +52,21 @@ export default function AIGenerator() {
           "x-rapidapi-host": "intellichat-ai-chatbot.p.rapidapi.com",
           "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: new URLSearchParams({
-          message: message,
-          temperature: temperature,
-        }),
+        body: formData.toString(),
       })
+
+      console.log("[v0] Response status:", response.status)
       const result = await response.text()
-      return result
+      console.log("[v0] API response:", result)
+
+      try {
+        const jsonResult = JSON.parse(result)
+        return jsonResult.response || jsonResult.message || result
+      } catch {
+        return result
+      }
     } catch (err) {
-      console.error(err)
+      console.error("[v0] API Error:", err)
       return "Sorry, I could not generate a response."
     }
   }
